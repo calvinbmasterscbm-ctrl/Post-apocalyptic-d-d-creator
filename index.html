@@ -67,6 +67,18 @@ select, button { padding: 10px; margin: 10px 0; width: 100%; }
     </select>
 
     <div id="classInfo"></div>
+<div id="prisonerCountry" style="display:none; margin-top:10px;">
+    <label for="countrySelect"><strong>What country did you escape from?</strong></label>
+    <select id="countrySelect">
+        <option value="">--Select Country--</option>
+        <option value="USA">USA</option>
+        <option value="Russia">Russia</option>
+        <option value="Japan">Japan</option>
+        <option value="China">China</option>
+        <option value="Australia">Australia</option>
+        <option value="Europe">Europe</option>
+    </select>
+</div>
 
     <button id="createCharacter">Create Character</button>
 
@@ -100,9 +112,9 @@ const classes = {
     "Spider": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":10,"WIS":12,"CHA":10}, "StartingGear":"SMG or Pistol, Sniper Rifle (not heavy), Cyborg Spider Legs, Light Armor", "Abilities":"Fast and mobile; can climb walls and strike stealthily." },
     "Cyborg": { "Stats":{"STR":16,"DEX":8,"CON":14,"INT":8,"WIS":10,"CHA":8}, "StartingGear":"Rusty Minigun, Heavy Armor", "Abilities":"Strong and heavily armored, carries heavy weapons." },
 "Prisoner": {
-    "Stats": {"STR":10,"DEX":10,"CON":10,"INT":10,"WIS":10,"CHA":10},
+    "Stats": {}, //will be set depending on the country
     "StartingGear": "Broken Bindings (wristwear)",
-    "Abilities": "Survivors who broke free from captivity. Their skills, knowledge, and gear depend on where they were imprisoned. You must choose a country at character creation.",
+    "Abilities": "Escaped from a country and carries knowledge, weapons, and armor from that place. Gains different stats and gear depending on choice.",
     "CountryOptions": {
         "USA": {
             "Stats": {"STR":2,"DEX":1,"CON":1},
@@ -178,6 +190,12 @@ document.getElementById('classSelect').addEventListener('change', () => {
     const selectedClass = document.getElementById('classSelect').value;
     const classInfoDiv = document.getElementById('classInfo');
 
+// Show/hide Prisoner country selector
+if (selectedClass === "Prisoner") {
+    document.getElementById("prisonerCountry").style.display = "block";
+} else {
+    document.getElementById("prisonerCountry").style.display = "none";
+}
     if(selectedClass && classes[selectedClass]) {
         const c = classes[selectedClass];
 
@@ -213,6 +231,63 @@ document.getElementById('createCharacter').addEventListener('click', () => {
         return; 
     }
 
+// Prisoner country choice
+// Prisoner country choice
+if (cls === "Prisoner") {
+    const country = document.getElementById("countrySelect").value;
+    if (!country) {
+        sheetDiv.innerHTML = "Please select a country for the Prisoner.";
+        return;
+    }
+
+    // Base stats for the country
+    let stats = {};
+    let countryGear = "";
+    switch(country) {
+        case "USA":
+            stats = {"STR":15,"DEX":14,"CON":16,"INT":12,"WIS":12,"CHA":10};
+            countryGear = "M16, Kevlar Vest, American Plans (item), Combat Boots";
+            break;
+        case "Russia":
+            stats = {"STR":17,"DEX":12,"CON":16,"INT":12,"WIS":12,"CHA":8};
+            countryGear = "RPK, Russian Plans (item), Parka";
+            break;
+        case "Japan":
+            stats = {"STR":13,"DEX":16,"CON":12,"INT":14,"WIS":12,"CHA":10};
+            countryGear = "Matrix Hard Drive, Katana";
+            break;
+        case "China":
+            stats = {"STR":15,"DEX":14,"CON":14,"INT":12,"WIS":12,"CHA":10};
+            countryGear = "Type 95 Automatic Rifle, Chinese Plans (item), Red Coat";
+            break;
+        case "Australia":
+            stats = {"STR":16,"DEX":15,"CON":14,"INT":12,"WIS":12,"CHA":11};
+            countryGear = "Pirate Plans (item), Pirate Hat, Cutlass, Grenade Pistol";
+            break;
+        case "Europe":
+            stats = {"STR":20,"DEX":14,"CON":13,"INT":14,"WIS":13,"CHA":11};
+            countryGear = "European Plans (item), European MechKnight codex, Greatsword, Hardened Breastplate";
+            break;
+    }
+
+    // Apply racial bonuses
+    for (const [stat, val] of Object.entries(races[race].Bonuses)) {
+        stats[stat] = (stats[stat] || 0) + val;
+    }
+
+    // Get racial abilities
+    const racialAbilities = races[race].Abilities || "None";
+
+    // Output character sheet with race in name
+    sheetDiv.innerHTML = `<h2>${race} Prisoner of ${country}</h2>
+        <strong>Stats & Modifiers:</strong><br>` +
+        Object.entries(stats).map(([k,v]) => `${k}: ${v} (Modifier: ${calcModifier(v)})`).join("<br>") +
+        `<br><br><strong>Racial Abilities:</strong> ${racialAbilities}<br>
+        <strong>Class Abilities:</strong> Knowledge of ${country}<br>
+        <strong>Starting Gear:</strong> Broken Bindings (wristwear), ${countryGear}`;
+
+    return;
+}
     const stats = {...classes[cls].Stats};
 
     if(race === "Weakling") {
