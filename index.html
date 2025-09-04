@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calvins Character Creator</title>
+<style>
+body { font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px; }
+.container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+h1 { text-align: center; }
+select, button { padding: 10px; margin: 10px 0; width: 100%; }
+.character-sheet { background: #eaeaea; padding: 10px; border-radius: 5px; margin-top: 10px; }
+.stat-choice { margin: 5px 0; }
+#raceInfo, #classInfo { background: #ddd; padding: 10px; border-radius: 5px; margin-top: 10px; }
+.bonus { color: green; font-weight: bold; }
+.penalty { color: red; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Calvins Character Creator</h1>
+    
+    <label for="raceSelect">Choose a Race:</label>
+    <select id="raceSelect">
+        <option value="">--Select Race--</option>
+        <option value="Weakling">Weakling</option>
+        <option value="Mutant">Mutant</option>
+        <option value="Synth">Synth</option>
+        <option value="Beast">Beast</option>
+        <option value="Nomad">Nomad</option>
+        <option value="Ghostborn">Ghostborn</option>
+        <option value="Wasteling">Wasteling</option>
+        <option value="Revenant">Revenant</option>
+        <option value="Scrapling">Scrapling</option>
+        <option value="Ashborn">Ashborn</option>
+        <option value="Ancient">Ancient</option>
+        <option value="Brain">Brain</option>
+    </select>
+
+    <div id="humanStats" style="display:none;">
+        <p>Select 2 stats to get +1 bonus each:</p>
+        <label class="stat-choice"><input type="checkbox" value="STR"> STR</label>
+        <label class="stat-choice"><input type="checkbox" value="DEX"> DEX</label>
+        <label class="stat-choice"><input type="checkbox" value="CON"> CON</label>
+        <label class="stat-choice"><input type="checkbox" value="INT"> INT</label>
+        <label class="stat-choice"><input type="checkbox" value="WIS"> WIS</label>
+        <label class="stat-choice"><input type="checkbox" value="CHA"> CHA</label>
+    </div>
+
+    <div id="raceInfo"></div>
+
+    <label for="classSelect">Choose a Class:</label>
+    <select id="classSelect">
+        <option value="">--Select Class--</option>
+        <option value="Alchemist">Alchemist</option>
+        <option value="Scanner">Scanner</option>
+        <option value="Knight">Knight</option>
+        <option value="Engineer">Engineer</option>
+        <option value="Pyro">Pyro</option>
+        <option value="Medic">Medic</option>
+        <option value="Cultist">Cultist</option>
+        <option value="Spider">Spider</option>
+        <option value="Cyborg">Cyborg</option>
+        <option value="Controller">Controller</option>
+        <option value="Machine">Machine</option>
+	<option value="Prisoner">Prisoner</option>
+    </select>
+
+    <div id="classInfo"></div>
+
+    <button id="createCharacter">Create Character</button>
+
+    <div id="characterSheet" class="character-sheet"></div>
+</div>
+
+<script>
+const races = {
+    "Weakling": { "Description": "Versatile and adaptable, but very vulnerable to the elements.", "Bonuses": {STR:0, DEX:0, CON:0, INT:0, WIS:0, CHA:0}, "Abilities":"None" },
+    "Mutant": { "Description": "Mutants are experiments of the Russian Federation, humans mutated through exposure to chemicals, radiation, and genetic modification. They are large, brutish, and unintelligent, but are strong and tough.", "Bonuses": {STR:2, CON:2, INT:-1, WIS:-1}, "Abilities":"Resistance to chemicals and radiation" },
+    "Synth": { "Description": "Artificially augmented humans, combining biology and cybernetics.", "Bonuses": {INT:2, DEX:1, CON:-1}, "Abilities":"Can interface with machines, minor hacking bonuses, immunity to certain electronic interference" },
+    "Beast": { "Description": "Humanoids with animalistic traits, heightened senses, and primal instincts.", "Bonuses": {DEX:2, STR:1, CHA:-1}, "Abilities":"Night vision, enhanced smell/hearing, natural claw attack" },
+    "Nomad": { "Description": "Survivors adapted to wandering harsh wastelands.", "Bonuses": {WIS:2, CON:1, INT:-1}, "Abilities":"Bonuses to survival, tracking, and movement over long distances" },
+    "Ghostborn": { "Description": "Humans mutated with psychic potential after radiation exposure.", "Bonuses": {INT:2, CHA:1, STR:-1}, "Abilities":"Minor telepathy, detection of hidden threats, can sense danger zones; vulnerable to fear and psychic attacks" },
+    "Wasteling": { "Description": "Humans who have grown up entirely in the wasteland, hardened and adaptable.", "Bonuses": {WIS:2, DEX:1, CHA:-1}, "Abilities":"Adaptation to extreme environments, bonuses to scavenging and survival checks" },
+    "Revenant": { "Description": "Humans brought back from the brink of death with cybernetic or alchemical enhancements.", "Bonuses": {CON:2, INT:1, CHA:-1}, "Abilities":"Limited regeneration, resistance to disease/poison, slower movement" },
+    "Scrapling": { "Description": "Tiny scavenger humanoids; quick and clever.", "Bonuses": {DEX:2, INT:1, STR:-1}, "Abilities":"Bonuses to crafting and scavenging" },
+    "Ashborn": { "Description": "Survivors of nuclear fallout; resilient and wary.", "Bonuses": {CON:2, WIS:1, CHA:-1}, "Abilities":"Resistant to fire and radiation, slight intimidation aura" },
+    "Ancient": { "Description": "Never trust an old man in a profession where men die young.", "Bonuses": {STR:-2, CON:-2, CHA:2, WIS:4}, "Abilities":"Wisdom modifies skills instead of INT" },
+    "Brain": { "Description": "Simply a human brain, nothing more.", "Bonuses": {STR:-12, DEX:-12, CON:-12, INT:-12, WIS:-12, CHA:-12}, "Abilities":"None" }
+};
+
+const classes = {
+    "Alchemist": { "Stats":{"STR":10,"DEX":12,"CON":10,"INT":14,"WIS":12,"CHA":10}, "StartingGear":"Parka, AK-47, Gas Mask", "Abilities":"Uses potions, chemicals, and improvised tools." },
+    "Scanner": { "Stats":{"STR":8,"DEX":12,"CON":10,"INT":14,"WIS":14,"CHA":10}, "StartingGear":"Scanning Rig Headgear, Heavy Brown Coat, MP5 SMG", "Abilities":"Detects enemies, hacks devices, and gathers info." },
+    "Knight": { "Stats":{"STR":14,"DEX":10,"CON":14,"INT":8,"WIS":10,"CHA":10}, "StartingGear":"Rusty Power Armor, Sword, SCAR 50 Cal", "Abilities":"Frontline fighter with heavy armor and weapons." },
+    "Engineer": { "Stats":{"STR":10,"DEX":12,"CON":12,"INT":14,"WIS":10,"CHA":10}, "StartingGear":"Automatic Shotgun, Broken Gauss Rifle, Armored Heavy Coat", "Abilities":"Repairs, modifies, and builds gadgets and weapons." },
+    "Pyro": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":10,"WIS":10,"CHA":10}, "StartingGear":"Flamethrower, Molotovs, Light SMG or Pistol, Fireproof Jacket", "Abilities":"Specializes in fire and explosives." },
+    "Medic": { "Stats":{"STR":10,"DEX":10,"CON":16,"INT":12,"WIS":12,"CHA":10}, "StartingGear":"M4 Rifle, Combat Knife, First Aid Kits, Medical Toolkit", "Abilities":"Heals and revives teammates." },
+    "Cultist": { "Stats":{"STR":10,"DEX":10,"CON":12,"INT":10,"WIS":14,"CHA":10}, "StartingGear":"AK-47, Plague Mask, Ritual Blade, Tattered Robes, Incense Kit", "Abilities":"Uses rituals and plagues to affect enemies and allies." },
+    "Spider": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":10,"WIS":12,"CHA":10}, "StartingGear":"SMG or Pistol, Sniper Rifle (not heavy), Cyborg Spider Legs, Light Armor", "Abilities":"Fast and mobile; can climb walls and strike stealthily." },
+    "Cyborg": { "Stats":{"STR":16,"DEX":8,"CON":14,"INT":8,"WIS":10,"CHA":8}, "StartingGear":"Rusty Minigun, Heavy Armor", "Abilities":"Strong and heavily armored, carries heavy weapons." },
+"Prisoner": {
+    "Stats": {"STR":10,"DEX":10,"CON":10,"INT":10,"WIS":10,"CHA":10},
+    "StartingGear": "Broken Bindings (wristwear)",
+    "Abilities": "Survivors who broke free from captivity. Their skills, knowledge, and gear depend on where they were imprisoned. You must choose a country at character creation.",
+    "CountryOptions": {
+        "USA": {
+            "Stats": {"STR":2,"DEX":1,"CON":1},
+            "Gear": "M16, Kevlar Vest, American Plans, Combat Boots"
+        },
+        "Russia": {
+            "Stats": {"STR":2,"CON":2,"WIS":-1},
+            "Gear": "RPK, Russian Plans, Parka"
+        },
+        "Japan": {
+            "Stats": {"DEX":2,"INT":2,"STR":-1},
+            "Gear": "Matrix Hard Drive, Katana"
+        },
+        "China": {
+            "Stats": {"INT":2,"DEX":1,"CON":1},
+            "Gear": "Type 95 Automatic Rifle, Chinese Plans, Red Coat"
+        },
+        "Australia": {
+            "Stats": {"STR":1,"CHA":2,"DEX":1},
+            "Gear": "Pirate Plans, Pirate Hat, Cutlass, Grenade Pistol"
+        },
+        "Europe": {
+            "Stats": {"WIS":2,"CHA":2,"DEX":-1},
+            "Gear": "FN FAL, European Plans, Wool Cloak"
+        }
+    },
+    "CountryPrompt": "What country did you escape from?"
+},
+
+    "Controller": { "Stats":{"STR":10,"DEX":12,"CON":12,"INT":14,"WIS":12,"CHA":10}, "StartingGear":"M16 rifle, Deployable Turret, Claymores (x3), Energy Shield Device, Portable Radar, Trench coat", "Abilities":"Sets up turrets, traps, and shields to control areas." },
+    "Machine": {
+    "Stats": {"STR":30,"DEX":15,"CON":30,"INT":17,"WIS":18,"CHA":10},
+    "StartingGear":"Belt-fed Heavy Machine Gun, Grenade Launcher",
+    "Abilities":"Walking mech about as tall as two humans. Only compatible with Brain. Can move and fire once every other turn.",
+    "SpecialNotes":"Only one Machine per group. If you claim the Machine, text the chat so we know you have claimed it.",
+    "AttachPoints": {
+        "Energy": 1,
+        "LightMG": 1,
+        "HeavyMG": 1,
+        "Rocket": 1,
+        "GrenadeLauncher": 1,
+        "Melee": 1,
+        "LargeItem": 1
+    }
+}
+};
+
+function calcModifier(stat) { return Math.floor((stat - 10)/2); }
+
+// Race info display
+document.getElementById('raceSelect').addEventListener('change', () => {
+    const selectedRace = document.getElementById('raceSelect').value;
+    const humanStatsDiv = document.getElementById('humanStats');
+    const raceInfoDiv = document.getElementById('raceInfo');
+
+    if(selectedRace && races[selectedRace]) {
+        let bonusesText = '';
+        for(const [stat, val] of Object.entries(races[selectedRace].Bonuses)) {
+            if(val > 0) bonusesText += `<span class="bonus">+${val} ${stat}</span> `;
+            else if(val < 0) bonusesText += `<span class="penalty">${val} ${stat}</span> `;
+        }
+        raceInfoDiv.innerHTML = `<strong>Description:</strong> ${races[selectedRace].Description}<br>
+                                 <strong>Bonuses:</strong> ${bonusesText}<br>
+                                 <strong>Abilities:</strong> ${races[selectedRace].Abilities || 'None'}`;
+    } else { raceInfoDiv.innerHTML = ''; }
+
+    if(selectedRace === "Weakling") humanStatsDiv.style.display = "block";
+    else { humanStatsDiv.style.display = "none"; document.querySelectorAll('#humanStats input').forEach(cb => cb.checked = false); }
+});
+
+// Class info display
+document.getElementById('classSelect').addEventListener('change', () => {
+    const selectedClass = document.getElementById('classSelect').value;
+    const classInfoDiv = document.getElementById('classInfo');
+
+    if(selectedClass && classes[selectedClass]) {
+        const c = classes[selectedClass];
+
+        // Check if Machine class and race is not Brain
+        if(selectedClass === "Machine" && document.getElementById('raceSelect').value !== "Brain") {
+            classInfoDiv.innerHTML = `<span style="color:red;">Machine class is only compatible with Brain race.</span>`;
+            return;
+        }
+
+        if(selectedClass === "Machine") {
+            let attachText = '';
+            for(const [point, count] of Object.entries(c.AttachPoints)) {
+                attachText += `- ${point.replace(/([A-Z])/g, ' $1')}: ${count}<br>`;
+            }
+            classInfoDiv.innerHTML = `<strong>${c.SpecialNotes}</strong><br>
+                                      <strong>Abilities:</strong> ${c.Abilities}<br>
+                                      <strong>Attach Points:</strong><br>${attachText}
+                                      <strong>Starting Gear:</strong> ${c.StartingGear}`;
+        } else {
+            classInfoDiv.innerHTML = `<strong>Abilities:</strong> ${c.Abilities}<br>
+                                      <strong>Starting Gear:</strong> ${c.StartingGear}`;
+        }
+    } else { classInfoDiv.innerHTML = ''; }
+});
+// Character sheet generation
+document.getElementById('createCharacter').addEventListener('click', () => {
+    const race = document.getElementById('raceSelect').value;
+    const cls = document.getElementById('classSelect').value;
+    const sheetDiv = document.getElementById('characterSheet');
+
+    if(!race || !cls) { 
+        sheetDiv.innerHTML = "Please select both a race and a class."; 
+        return; 
+    }
+
+    const stats = {...classes[cls].Stats};
+
+    if(race === "Weakling") {
+        const checked = document.querySelectorAll('#humanStats input[type=checkbox]:checked');
+        if(checked.length !== 2) { 
+            sheetDiv.innerHTML = "Please select exactly 2 stats for Weakling bonuses."; 
+            return; 
+        }
+        checked.forEach(cb => stats[cb.value] += 1);
+    } else {
+        for(const [stat, val] of Object.entries(races[race].Bonuses)) {
+            stats[stat] += val;
+        }
+    }
+
+    let statsText = '';
+    for(let key in stats) { 
+        const mod = calcModifier(stats[key]); 
+        statsText += `${key}: ${stats[key]} (Modifier: ${mod >=0 ? '+'+mod : mod})<br>`; 
+    }
+
+    let attachText = '';
+    if(cls === "Machine") {
+        for(const point of Object.keys(classes[cls].AttachPoints)) {
+            attachText += `- ${point.replace(/([A-Z])/g, ' $1')}<br>`;
+        }
+    }
+
+    sheetDiv.innerHTML = `<h2>${race} ${cls}</h2>
+        ${cls === "Machine" ? `<strong>${classes[cls].SpecialNotes}</strong><br>` : ''}
+        <strong>Stats & Modifiers:</strong><br>${statsText}<br>
+        <strong>Abilities:</strong> ${classes[cls].Abilities}<br>
+        ${cls === "Machine" ? `<strong>Attach Points:</strong><br>${attachText}` : ''}
+        <strong>Starting Gear:</strong> ${classes[cls].StartingGear}`;
+});
+</script>
+</body>
+</html>
