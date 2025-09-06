@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,16 @@ body { font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px;
 .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
 h1 { text-align: center; }
 select, button { padding: 10px; margin: 10px 0; width: 100%; }
-.character-sheet { background: #eaeaea; padding: 10px; border-radius: 5px; margin-top: 10px; }
+.character-sheet { background: #eaeaea; padding: 10px; border-radius: 5px; margin-top: 10px; position: relative; display: flex; align-items: flex-start; gap: 15px; }
+.character-image {
+    width: 160px;        /* fixed width */
+    height: 220px;       /* fixed height */
+    object-fit: cover;   /* crop without squishing */
+    object-position: top;/* keep the top visible (good for portraits) */
+    border-radius: 10px;
+    border: 2px solid #999;
+}
+.character-details { flex: 1; }
 .stat-choice { margin: 5px 0; }
 #raceInfo, #classInfo { background: #ddd; padding: 10px; border-radius: 5px; margin-top: 10px; }
 .bonus { color: green; font-weight: bold; }
@@ -66,7 +76,7 @@ select, button { padding: 10px; margin: 10px 0; width: 100%; }
         <option value="Spider">Spider</option>
         <option value="Cyborg">Cyborg</option>
         <option value="Controller">Controller</option>
-        <option value="Machine">Machine</option>
+        <option value="The Machine">The Machine</option>
         <option value="Prisoner">Prisoner</option>
         <option value="Necromancer">Necromancer</option>
         <option value="Harbinger">Harbinger</option>
@@ -111,17 +121,17 @@ const races = {
 };
 
 const classes = {
-    "Alchemist": { "Stats":{"STR":10,"DEX":12,"CON":10,"INT":14,"WIS":12,"CHA":10}, "StartingGear":"Parka, AK-47, Gas Mask", "Abilities":"Uses potions, chemicals, and improvised tools." },
-    "Scanner": { "Stats":{"STR":8,"DEX":12,"CON":10,"INT":14,"WIS":14,"CHA":10}, "StartingGear":"Scanning Rig Headgear, Heavy Brown Coat, MP5 SMG", "Abilities":"Detects enemies, hacks devices, and gathers info." },
-    "Knight": { "Stats":{"STR":14,"DEX":10,"CON":14,"INT":8,"WIS":10,"CHA":10}, "StartingGear":"Rusty Power Armor, Sword, SCAR 50 Cal", "Abilities":"Frontline fighter with heavy armor and weapons." },
-    "Engineer": { "Stats":{"STR":10,"DEX":12,"CON":12,"INT":14,"WIS":10,"CHA":10}, "StartingGear":"Automatic Shotgun, Broken Gauss Rifle, Armored Heavy Coat", "Abilities":"Repairs, modifies, and builds gadgets and weapons." },
-    "Pyro": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":10,"WIS":10,"CHA":10}, "StartingGear":"Flamethrower, Molotovs, Light SMG or Pistol, Fireproof Jacket", "Abilities":"Specializes in fire and explosives." },
-    "Medic": { "Stats":{"STR":10,"DEX":10,"CON":16,"INT":12,"WIS":12,"CHA":10}, "StartingGear":"M4 Rifle, Combat Knife, First Aid Kits, Medical Toolkit", "Abilities":"Heals and revives teammates." },
-    "Cultist": { "Stats":{"STR":10,"DEX":10,"CON":12,"INT":10,"WIS":14,"CHA":10}, "StartingGear":"AK-47, Plague Mask, Ritual Blade, Tattered Robes, Incense Kit", "Abilities":"Uses rituals and plagues to affect enemies and allies." },
-    "Spider": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":10,"WIS":12,"CHA":10}, "StartingGear":"SMG or Pistol, Sniper Rifle (not heavy), Cyborg Spider Legs, Light Armor", "Abilities":"Fast and mobile; can climb walls and strike stealthily." },
-    "Cyborg": { "Stats":{"STR":16,"DEX":8,"CON":14,"INT":8,"WIS":10,"CHA":8}, "StartingGear":"Rusty Minigun, Heavy Armor", "Abilities":"Strong and heavily armored, carries heavy weapons." },
+    "Alchemist": { "Stats":{"STR":10,"DEX":12,"CON":10,"INT":14,"WIS":12,"CHA":10}, "StartingGear":"Parka, AK-47, Gas Mask", "Abilities":"Uses potions, chemicals, and improvised tools.", "Image":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHuuCG2jetMuvDV4kB9HFtSb21NfNFlN_coQ&s" },
+    "Scanner": { "Stats":{"STR":8,"DEX":12,"CON":10,"INT":14,"WIS":14,"CHA":10}, "StartingGear":"Scanning Rig Headgear, Heavy Brown Coat, MP5 SMG", "Abilities":"Detects enemies, hacks devices, and gathers info.", "Image":"https://theforeverwinter.wiki.gg/images/thumb/5/54/Shaman.PNG/320px-Shaman.PNG?912b29" },
+    "Knight": { "Stats":{"STR":14,"DEX":10,"CON":14,"INT":8,"WIS":10,"CHA":10}, "StartingGear":"Rusty Power Armor, Sword, SCAR 50 Cal", "Abilities":"Frontline fighter with heavy armor and weapons.", "Image":"https://static.wikia.nocookie.net/foreverwinter/images/7/7c/Euruskan_Sniper.webp/revision/latest?cb=20241207130345" },
+    "Engineer": { "Stats":{"STR":10,"DEX":12,"CON":12,"INT":14,"WIS":10,"CHA":10}, "StartingGear":"Automatic Shotgun, Broken Gauss Rifle, Armored Heavy Coat", "Abilities":"Repairs, modifies, and builds gadgets and weapons.", "Image":"https://theforeverwinter.wiki.gg/images/thumb/4/4f/BagMan.PNG/320px-BagMan.PNG?ea55f0" },
+    "Pyro": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":10,"WIS":10,"CHA":10}, "StartingGear":"Flamethrower, Molotovs, Light SMG or Pistol, Fireproof Jacket", "Abilities":"Specializes in fire and explosives.", "Image":"https://i.ytimg.com/vi/DxT7Mhw-m6s/maxresdefault.jpg" },
+    "Medic": { "Stats":{"STR":10,"DEX":10,"CON":16,"INT":12,"WIS":12,"CHA":10}, "StartingGear":"M4 Rifle, Combat Knife, First Aid Kits, Medical Toolkit", "Abilities":"Heals and revives teammates.", "Image":"https://static.wikia.nocookie.net/foreverwinter/images/4/4f/Europan_EOD.webp/revision/latest/smart/width/386/height/259?cb=20241012142933" },
+    "Cultist": { "Stats":{"STR":10,"DEX":10,"CON":12,"INT":10,"WIS":14,"CHA":10}, "StartingGear":"AK-47, Plague Mask, Ritual Blade, Tattered Robes, Incense Kit", "Abilities":"Uses rituals and plagues to affect enemies and allies.", "Image":"https://cdna.artstation.com/p/assets/images/images/020/017/018/large/xander-smith-plaguedoctorsuitfinal-conceptillustration-final.jpg?1565984733" },
+    "Spider": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":10,"WIS":12,"CHA":10}, "StartingGear":"SMG or Pistol, Sniper Rifle (not heavy), Cyborg Spider Legs, Light Armor", "Abilities":"Fast and mobile; can climb walls and strike stealthily.", "Image":"https://l450v.alamy.com/450v/2kb3ewt/spider-man-2-doctor-octopus-artwork-2004-2kb3ewt.jpg" },
+    "Cyborg": { "Stats":{"STR":16,"DEX":8,"CON":14,"INT":8,"WIS":10,"CHA":8}, "StartingGear":"Rusty Minigun, Heavy Armor", "Abilities":"Strong and heavily armored, carries heavy weapons.", "Image":"https://static.wikia.nocookie.net/foreverwinter/images/9/9a/%D0%92%D0%9B%D0%90%D0%94%D0%95%D0%9B%D0%95%D0%A6_%28Vladelets%29.webp/revision/latest/scale-to-width-down/600?cb=20241207130816" },
     "Prisoner": {
-        "Stats": {}, 
+        "Stats": {},
         "StartingGear": "Broken Bindings (wristwear)",
         "Abilities": "Escaped from a country and carries knowledge, weapons, and armor from that place. Gains different stats and gear depending on choice.",
         "CountryOptions": {
@@ -132,19 +142,21 @@ const classes = {
             "Australia": { "Stats": {"STR":11,"DEX":11,"CON":10,"INT":10,"WIS":10,"CHA":12}, "Gear": "Pirate Plans, Pirate Hat, Cutlass, Grenade Pistol" },
             "Europe": { "Stats": {"STR":10,"DEX":9,"CON":10,"INT":10,"WIS":12,"CHA":12}, "Gear": "FN FAL, European Plans, Wool Cloak" }
         },
-        "CountryPrompt": "What country did you escape from?"
+        "CountryPrompt": "What country did you escape from?",
+        "Image": "https://theforeverwinter.wiki.gg/images/thumb/3/3b/OldMan.PNG/320px-OldMan.PNG?512bb9"
     },
-    "Controller": { "Stats":{"STR":10,"DEX":12,"CON":12,"INT":14,"WIS":12,"CHA":10}, "StartingGear":"M16 rifle, Deployable Turret, Claymores (x3), Energy Shield Device, Portable Radar, Trench coat", "Abilities":"Sets up turrets, traps, and shields to control areas." },
-    "Machine": {
+    "Controller": { "Stats":{"STR":10,"DEX":12,"CON":12,"INT":14,"WIS":12,"CHA":10}, "StartingGear":"M16 rifle, Deployable Turret, Claymores (x3), Energy Shield Device, Portable Radar, Trench coat", "Abilities":"Sets up turrets, traps, and shields to control areas.", "Image":"https://images.steamusercontent.com/ugc/2495647722469496858/EE50D9FAEF9C081F77FA9E3C729B7DD440EC5827/?imw=200&imh=200&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true" },
+    "The Machine": {
         "Stats": {"STR":30,"DEX":15,"CON":30,"INT":17,"WIS":18,"CHA":10},
         "StartingGear":"Belt-fed Heavy Machine Gun, Grenade Launcher",
         "Abilities":"Walking mech about as tall as two humans. Only compatible with Brain. Can move and fire once every other turn.",
         "SpecialNotes":"Only one Machine per group. If you claim the Machine, text the chat so we know you have claimed it.",
-        "AttachPoints": { "Energy": 1,"LightMG": 1,"HeavyMG": 1,"Rocket": 1,"GrenadeLauncher": 1,"Melee": 1,"LargeItem": 1 }
+        "AttachPoints": { "Energy": 1,"LightMG": 1,"HeavyMG": 1,"Rocket": 1,"GrenadeLauncher": 1,"Melee": 1,"LargeItem": 1 },
+        "Image":"https://c8.alamy.com/comp/RKGGEX/heavy-metal-mind-3d-illustration-of-science-fiction-scary-robotic-skull-artificial-intelligence-hardwired-to-computer-core-RKGGEX.jpg"
     },
-    "Necromancer": { "Stats":{"STR":8,"DEX":10,"CON":12,"INT":16,"WIS":14,"CHA":12}, "StartingGear":"Bloody Medical Scrubs, Ak-47, Surgical Knife", "Abilities":"Collects biomass to create tools such as replacement organs, golems, and bioluminescent lights and sensors" },
-    "Harbinger": { "Stats":{"STR":14,"DEX":12,"CON":14,"INT":10,"WIS":12,"CHA":8}, "StartingGear":"Dark Cloak, Heavy Blade, Revolver, Musical instrument of choice", "Abilities":"Spreads fear, demoralizes foes, encourages allies with music" },
-    "Sniper": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":15,"WIS":12,"CHA":10}, "StartingGear":"Sniper Rifle, Combat Knife, Recon Drone", "Abilities":"Veteran sniper with advanced knowledge of enemy weak points; can deploy drones." }
+    "Necromancer": { "Stats":{"STR":8,"DEX":10,"CON":12,"INT":16,"WIS":14,"CHA":12}, "StartingGear":"Bloody Medical Scrubs, Ak-47, Surgical Knife", "Abilities":"Collects biomass to create tools such as replacement organs, golems, and bioluminescent lights and sensors", "Image":"https://theforeverwinter.wiki.gg/images/thumb/9/96/Euroasian_Brawler_Art_1.jpg/450px-Euroasian_Brawler_Art_1.jpg?c0a1a6" },
+    "Harbinger": { "Stats":{"STR":14,"DEX":12,"CON":14,"INT":10,"WIS":12,"CHA":8}, "StartingGear":"Dark Cloak, Heavy Blade, Revolver, Musical instrument of choice", "Abilities":"Spreads fear, demoralizes foes, encourages allies with music", "Image":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkUdWT8Z4_hA0i7xNYtE232OYfTOBn0we4-tjN7L9-ygKzVOSZG1BLhqBHFFvnI-JK-2A&usqp=CAU" },
+    "Sniper": { "Stats":{"STR":10,"DEX":14,"CON":12,"INT":15,"WIS":12,"CHA":10}, "StartingGear":"Sniper Rifle, Combat Knife, Recon Drone", "Abilities":"Veteran sniper with advanced knowledge of enemy weak points; can deploy drones.", "Image":"https://cdn.mos.cms.futurecdn.net/v2/t:0,l:433,cw:1101,ch:1101,q:80,w:1101/b5d2aFfSNRJSiFGuVGU2iG.jpg" }
 };
 
 // Stat modifier calculation
@@ -185,12 +197,12 @@ document.getElementById('classSelect').addEventListener('change', () => {
     if(selectedClass && classes[selectedClass]) {
         const c = classes[selectedClass];
 
-        if(selectedClass === "Machine" && document.getElementById('raceSelect').value !== "Brain") {
-            classInfoDiv.innerHTML = `<span style="color:red;">Machine class is only compatible with Brain race.</span>`;
+        if(selectedClass === "The Machine" && document.getElementById('raceSelect').value !== "Brain") {
+            classInfoDiv.innerHTML = `<span style="color:red;">The Machine class is only compatible with Brain race.</span>`;
             return;
         }
 
-        if(selectedClass === "Machine") {
+        if(selectedClass === "The Machine") {
             let attachText = '';
             for(const [point, count] of Object.entries(c.AttachPoints)) {
                 attachText += `- ${point.replace(/([A-Z])/g, ' $1')}: ${count}<br>`;
@@ -264,10 +276,21 @@ document.getElementById('createCharacter').addEventListener('click', () => {
     statHTML += '</table>';
 
     // Display character sheet
-    sheetDiv.innerHTML = `<h2>${race} ${cls}${cls === "Prisoner" ? " of " + country : ""}</h2>
-                          ${statHTML}
-                          <strong>Starting Gear:</strong> ${gear}<br>
-                          <strong>Abilities:</strong> ${abilities}`;
+   // Display character sheet with image
+let imageURL = cls === "Prisoner" ? classes.Prisoner.Image : classes[cls].Image;
+
+sheetDiv.innerHTML = `
+<div class="character-sheet">
+    <img src="${imageURL}" alt="${cls} Image" class="character-image">
+    <div class="character-details">
+        <h2>${race} ${cls}${cls === "Prisoner" ? " of " + country : ""}</h2>
+        ${statHTML}
+        <strong>Starting Gear:</strong> ${gear}<br>
+        <strong>Abilities:</strong> ${abilities}
+    </div>
+</div>
+`;
+
 });
 </script>
 </body>
